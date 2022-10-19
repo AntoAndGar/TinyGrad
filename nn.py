@@ -35,3 +35,37 @@ class Neuron(Module):
             "ReLU" if self.act == "relu" else "Tanh" if self.act == "tanh" else "Linear"
         )
         return f"{act}_Neuron({len(self.w)})"
+
+class Layer(Module):
+    def __init__(self, nin, non, act=None):
+        self.layer = [Neuron(nin, act) for _ in range(non)]
+
+    def __call__(self, input):
+        out = [n(input) for n in self.layer]
+        return out[0] if len(out) == 1 else out
+
+    def parameters(self):
+        return [p for n in self.layer for p in n.parameters()]
+
+    def __repr__(self):
+        return f"Layer of [{', '.join(str(n) for n in self.layer)}]"
+
+class MLP(Module):
+    def __init__(self, nin, nouts, act):
+        sizes = [nin] + nouts
+        []
+        self.layers = [
+            Layer(sizes[i], sizes[i + 1], act=act if isinstance(act, str) else act[i] if i<len(act) else None)
+            for i in range(len(nouts))
+        ]
+    
+    def __call__(self, x):
+        for layer in self.layers:
+            x = layer(x)
+        return x
+
+    def parameters(self):
+        return [p for layer in self.layers for p in layer.parameters()]
+
+    def __repr__(self):
+        return f"MLP of [{', '.join(str(layer) for layer in self.layers)}]"

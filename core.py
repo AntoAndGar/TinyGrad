@@ -1,4 +1,6 @@
+from ast import Param
 import math
+from turtle import back
 
 
 class Parameter:
@@ -88,6 +90,53 @@ class Parameter:
         out._backward = _backward
 
         return out
+
+###############
+# TODO: test if derivative are correct
+
+    def sigmoid(self):
+        out = Parameter(1 / (1 + math.e ** (-self.data)), (self,), "sigmoid")
+
+        def _backward():
+            self.grad += (1 - out.data) * out.data * out.grad
+
+        out._backward = _backward
+
+        return out
+
+    def c_softplus(self):
+        e_x = math.e ** self.data
+        out = Parameter(math.log(e_x + 1,math.e)-math.log(2,math.e),(self,), "c_softplus")
+
+        def _backward():
+            self.grad += e_x / (e_x + 1) * out.grad # TODO: add derivative of ln
+        
+        out._backward= _backward
+
+        return out
+
+    def lrelu(self, alpha = 0.01):
+        out = Parameter(alpha*self.data if self.data < 0 else self.data, (self,), "LReLU")
+
+        def _backward():
+            self.grad += (1 if out.data > 0 else alpha) * out.grad
+
+        out._backward = _backward
+
+        return out
+
+    def elu(self, alpha= 0.01):
+        e_x = math.e ** self.data
+        out = Parameter(alpha*(e_x -1) if self.data < 0 else self.data, (self,), "ELU")
+
+        def _backward():
+            self.grad += (1 if out.data > 0 else alpha*e_x) * out.grad
+
+        out._backward = _backward
+
+        return out
+
+##############################
 
     def backward(self):
         dag = []
