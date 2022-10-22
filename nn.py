@@ -24,6 +24,14 @@ class Neuron(Module):
             if self.act == "relu"
             else out.tanh()
             if self.act == "tanh"
+            else out.sigmoid()
+            if self.act == "sigmoid"
+            else out.lrelu()
+            if self.act == "lrelu"
+            else out.c_softplus()
+            if self.act == "c_softplus"
+            else out.elu()
+            if self.act == "elu"
             else out
         )
 
@@ -32,9 +40,22 @@ class Neuron(Module):
 
     def __repr__(self):
         act = (
-            "ReLU" if self.act == "relu" else "Tanh" if self.act == "tanh" else "Linear"
+            "ReLU"
+            if self.act == "relu"
+            else "Tanh"
+            if self.act == "tanh"
+            else "Sigmoid"
+            if self.act == "sigmoid"
+            else "LReLU"
+            if self.act == "lrelu"
+            else "c_softplus"
+            if self.act == "c_softplus"
+            else "elu"
+            if self.act == "elu"
+            else "Linear"
         )
         return f"{act}_Neuron({len(self.w)})"
+
 
 class Layer(Module):
     def __init__(self, nin, non, act=None):
@@ -50,15 +71,20 @@ class Layer(Module):
     def __repr__(self):
         return f"Layer of [{', '.join(str(n) for n in self.layer)}]"
 
+
 class MLP(Module):
     def __init__(self, nin, nouts, act):
         sizes = [nin] + nouts
         []
         self.layers = [
-            Layer(sizes[i], sizes[i + 1], act=act if isinstance(act, str) else act[i] if i<len(act) else None)
+            Layer(
+                sizes[i],
+                sizes[i + 1],
+                act=act if isinstance(act, str) else act[i] if i < len(act) else None,
+            )
             for i in range(len(nouts))
         ]
-    
+
     def __call__(self, x):
         for layer in self.layers:
             x = layer(x)

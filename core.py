@@ -44,6 +44,8 @@ class Parameter:
         return self * other
 
     def __pow__(self, x):
+        #x = x.data if isinstance(x, Parameter) else x
+        #self = self if isinstance(self, Parameter) else Parameter(self)
         out = Parameter(self.data**x, (self,), f"**{x}")
 
         def _backward():
@@ -92,7 +94,7 @@ class Parameter:
         return out
 
 ###############
-# TODO: test if derivative are correct
+# TODO: test if these derivative are correct
 
     def sigmoid(self):
         out = Parameter(1 / (1 + math.e ** (-self.data)), (self,), "sigmoid")
