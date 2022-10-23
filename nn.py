@@ -66,7 +66,7 @@ class Layer(Module):
         return out[0] if len(out) == 1 else out
 
     def parameters(self):
-        return [p for n in self.layer for p in n.parameters()]
+        return [param for neuron in self.layer for param in neuron.parameters()]
 
     def __repr__(self):
         return f"Layer of [{', '.join(str(n) for n in self.layer)}]"
@@ -91,7 +91,7 @@ class MLP(Module):
         return x
 
     def parameters(self):
-        return [p for layer in self.layers for p in layer.parameters()]
+        return [param for layer in self.layers for param in layer.parameters()]
 
     def __repr__(self):
         return f"MLP of [{', '.join(str(layer) for layer in self.layers)}]"
