@@ -1,3 +1,4 @@
+from dis import dis
 import random
 from core import Parameter
 
@@ -12,13 +13,19 @@ class Module:
 
 
 class Neuron(Module):
-    def __init__(self, number_of_inputs, act=None):
-        self.w = [Parameter(random.uniform(-1, 1)) for _ in range(number_of_inputs)]
+    def __init__(self, number_of_inputs, act=None, dist = None):
+        self.w = [Parameter(dist(0.0, 1.0) if dist != None else random.uniform(-1, 1)) for _ in range(number_of_inputs)]
         self.b = Parameter(0)
         self.act = act
 
     def __call__(self, x):
-        out = sum((wi * xi for wi, xi in zip(self.w, x)), start=self.b)
+        out = sum(
+            (
+                wi * (xi if isinstance(xi, Parameter) else Parameter(xi))
+                for wi, xi in zip(self.w, x)
+            ),
+            start=self.b,
+        )
         return (
             out.relu()
             if self.act == "relu"
@@ -58,8 +65,8 @@ class Neuron(Module):
 
 
 class Layer(Module):
-    def __init__(self, nin, non, act=None):
-        self.layer = [Neuron(nin, act) for _ in range(non)]
+    def __init__(self, nin, non, act=None, dist = None):
+        self.layer = [Neuron(nin, act, dist) for _ in range(non)]
 
     def __call__(self, input):
         out = [n(input) for n in self.layer]
@@ -73,14 +80,14 @@ class Layer(Module):
 
 
 class MLP(Module):
-    def __init__(self, nin, nouts, act):
+    def __init__(self, nin, nouts, act, dist = None):
         sizes = [nin] + nouts
-        []
         self.layers = [
             Layer(
                 sizes[i],
                 sizes[i + 1],
                 act=act if isinstance(act, str) else act[i] if i < len(act) else None,
+                dist=dist
             )
             for i in range(len(nouts))
         ]
